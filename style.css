@@ -1373,14 +1373,14 @@ input, textarea { font: inherit; color: inherit; }
   left: 0;
   top: 0;
   width: 402px;
-  height: 124px;
+  height: 60px;
   background-color: #f7fbff;
   overflow: hidden;
 }
 
 .brand-and-cart {
   left: 0;
-  top: 64px;
+  top: 0px;
   width: 402px;
   height: 60px;
   background-color: #ffffff;
@@ -1550,7 +1550,7 @@ input, textarea { font: inherit; color: inherit; }
 
 .full-length-page-content {
   left: 0;
-  top: 124px;
+  top: 60px;
   width: 402px;
   height: 2392px;
 }
