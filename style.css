@@ -1,0 +1,5867 @@
+/* =====================================================================
+   Sweena – style.css
+   Bagian 1: gaya dasar buatan manual (layout responsif, overlay, notifikasi).
+   Bagian 2 (di bawah): gaya hasil konversi desain Figma, satu kelas per layer.
+   ===================================================================== */
+
+/* ---------- Reset ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: #ffffff; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+[hidden] { display: none !important; }
+
+/* ---------- Garis retro ----------
+   Papan catur kotak 14px. Kotaknya dibuat oleh script.js (bagian 3), jadi HTML cukup
+   <div class="retro-line"></div>. Warna tiap garis = `color` pada kelasnya masing-masing. */
+.retro-square { top: 0; width: 14px; height: 14px; background: currentColor; }
+.retro-square:nth-child(even) { top: 14px; }
+
+a { color: inherit; text-decoration: none; }
+p { margin: 0; }
+input, textarea { font: inherit; color: inherit; }
+
+/* ---------- Kerangka halaman ----------
+   Setiap halaman punya 2 desain dari Figma: desktop (1280px) dan mobile (402px).
+   script.js menskalakan frame agar pas dengan lebar layar; di bawah 768px desain mobile dipakai. */
+.fit { position: relative; margin: 0 auto; overflow: hidden; }
+.fit--mobile { display: none; }
+.frame { position: relative; transform-origin: 0 0; }
+@media (max-width: 767px) {
+  .fit--desktop { display: none; }
+  .fit--mobile { display: block; }
+}
+
+/* Semua layer Figma diposisikan absolut terhadap frame induknya */
+.frame div, .frame p, .frame a, .frame nav, .frame footer, .frame svg,
+.frame input, .frame textarea, .frame template { position: absolute; }
+.frame span { position: static; }
+.frame a { display: block; }
+.frame input, .frame textarea { margin: 0; }
+.frame input::placeholder, .frame textarea::placeholder { color: inherit; opacity: .55; }
+.frame input.is-invalid, .frame textarea.is-invalid { outline: 2px solid #e5484d; outline-offset: 6px; border-radius: 12px; }
+[data-scroll] { overflow-y: auto !important; scrollbar-width: thin; }
+
+/* Elemen yang bisa diklik */
+[data-action], [data-link], a[href] { cursor: pointer; transition: filter .15s; }
+[data-action]:hover, a[href]:hover { filter: brightness(.96); }
+[data-action]:active, a[href]:active { filter: brightness(.9); }
+[data-action]:focus-visible, a[href]:focus-visible { outline: 2px solid #5e91b8; outline-offset: 2px; }
+
+/* ---------- Panel keranjang (overlay) ---------- */
+.cart-overlay { position: fixed; inset: 0; z-index: 100; background: rgba(0, 0, 0, .45); overflow: auto; }
+.cart-overlay .fit { margin: 0; overflow: visible; }
+.cart-overlay .fit--desktop { position: absolute; right: 0; top: 0; }
+.cart-overlay .fit--mobile { margin: 0 auto; }
+
+/* ---------- Notifikasi (toast) ---------- */
+.toasts { position: fixed; top: 24px; left: 0; right: 0; z-index: 200; pointer-events: none; }
+.toasts .fit { position: absolute; left: 50%; top: 0; margin: 0; overflow: visible; opacity: 0; transform: translate(-50%, -140%);
+               transition: transform .35s ease, opacity .35s ease; }
+.toasts .fit.is-visible { opacity: 1; transform: translate(-50%, 0); }
+.toasts .fit--mobile { display: none; }
+@media (max-width: 767px) { .toasts .fit--desktop { display: none; } .toasts .fit--mobile { display: block; } }
+
+/* ---------- Bagian dinamis (item keranjang & struk) ---------- */
+.items-empty { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: grid; place-items: center; text-align: center;
+               font: 500 16px/1.5 Poppins, sans-serif; color: #466c8c; padding: 0 16px; }
+.receipt { position: absolute; left: 0; top: 0; width: 100%; }
+.frame .receipt__row { position: relative; display: flex; }
+.receipt__label { flex: 0 0 197px; display: flex; justify-content: space-between; padding-right: 8px; white-space: nowrap; }
+.receipt__label::after { content: ":"; }
+.receipt__value { flex: 1; white-space: pre-wrap; min-width: 0; }
+.frame .receipt--desktop .receipt__row { margin-bottom: 13px; }
+.receipt--mobile { padding: 19px; }
+.frame .receipt--mobile .receipt__row { display: block; margin-bottom: 14px; }
+.receipt--mobile .receipt__label { display: block; flex: none; padding: 0; }
+.receipt--mobile .receipt__label::after { content: none; }
+
+/* ---------- Menu mobile (tombol hamburger) ---------- */
+.mobile-menu { position: fixed; top: 64px; right: 12px; z-index: 90; min-width: 200px; padding: 8px; background: #f7fbff;
+               border: 1.5px solid #a9cde8; border-radius: 24px; box-shadow: 0 8px 24px rgba(32, 75, 112, .2);
+               font: 500 16px Poppins, sans-serif; }
+.mobile-menu a { display: block; padding: 10px 18px; border-radius: 16px; color: #466c8c; }
+.mobile-menu a:hover { background: #faaffb; filter: none; }
+@media (min-width: 768px) { .mobile-menu { display: none !important; } }
+
+/* ============ Gaya struk (diambil dari desain Figma) ============ */
+.receipt--desktop .receipt__label {
+  font-family: 'Inter', sans-serif;
+  font-size: 23px;
+  font-weight: 600;
+  color: #204b70;
+  line-height: 1.45;
+}
+.receipt--desktop .receipt__value {
+  font-family: 'Inter', sans-serif;
+  font-size: 23px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.45;
+}
+
+.receipt--mobile .receipt__label {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #466c8c;
+  line-height: 1.5;
+}
+.receipt--mobile .receipt__value {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.5;
+}
+
+
+/* ============ Halaman: index (hasil konversi desain Figma) ============ */
+
+.landing-page {
+  left: 0;
+  top: 0;
+  width: 1280px;
+  height: 4485px;
+  background-color: #eaf5ff;
+  overflow: hidden;
+}
+
+.tagline-container {
+  left: -22px;
+  top: 788px;
+  width: 1325px;
+  height: 66px;
+  border-radius: 16px 16px 16px 16px;
+  background-color: #f7fbff;
+}
+
+.tagline {
+  left: -90px;
+  top: 804px;
+  width: 1756px;
+  height: 36px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  color: #285f8d;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre;
+}
+
+.hero-image {
+  left: 0;
+  top: 0;
+  width: 352.46px;
+  height: 441.17px;
+  transform: matrix(0.9, 0.43, -0.43, 0.9, 104.88, 196);
+  transform-origin: 0 0;
+  background-image: url(images/hero-buket-merah.png);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.hero-image-2 {
+  left: 0;
+  top: 0;
+  width: 396px;
+  height: 473px;
+  transform: matrix(-0.89, 0.45, 0.45, 0.89, 1272.25, 190) rotate(-25deg);
+  transform-origin: 0 0;
+  background-image: url(images/hero-buket-biru-ungu.png);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.order-step-5-surface {
+  left: 64px;
+  top: 2381px;
+  width: 1152px;
+  height: 122px;
+  border-radius: 20px 20px 20px 20px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+}
+
+.order-step-4-surface {
+  left: 64px;
+  top: 2241px;
+  width: 1152px;
+  height: 122px;
+  border-radius: 20px 20px 20px 20px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+}
+
+.order-step-3-surface {
+  left: 64px;
+  top: 2101px;
+  width: 1152px;
+  height: 122px;
+  border-radius: 20px 20px 20px 20px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+}
+
+.order-step-2-surface {
+  left: 64px;
+  top: 1961px;
+  width: 1152px;
+  height: 122px;
+  border-radius: 20px 20px 20px 20px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+}
+
+.order-step-1-surface {
+  left: 64px;
+  top: 1821px;
+  width: 1152px;
+  height: 122px;
+  border-radius: 20px 20px 20px 20px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+}
+
+.about-us-image {
+  left: 64px;
+  top: 2670px;
+  width: 494px;
+  height: 536px;
+  overflow: hidden;
+}
+
+.about-us-image-2 {
+  left: 0;
+  top: 0;
+  width: 310px;
+  height: 390px;
+  border-radius: 24px 24px 24px 24px;
+  background-image: url(images/about-buket-pita-kotak.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.about-us-image-3 {
+  left: 194px;
+  top: 176px;
+  width: 300px;
+  height: 360px;
+  border-radius: 24px 24px 24px 24px;
+  background-image: url(images/produk-blooming-aurora-bouquet.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.about-us-label {
+  left: 64px;
+  top: 2576px;
+  width: 1000px;
+  height: 64px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 44px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.45;
+  letter-spacing: -0.03em;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.catalog-label {
+  left: 64px;
+  top: 912px;
+  width: 700px;
+  height: 64px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 44px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.45;
+  letter-spacing: -0.03em;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.how-to-order-label {
+  left: 64px;
+  top: 1733px;
+  width: 1000px;
+  height: 64px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 44px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.45;
+  letter-spacing: -0.03em;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.how-to-order-steps {
+  left: 88px;
+  top: 1839px;
+  width: 1074px;
+  height: 643px;
+  overflow: hidden;
+}
+
+.step-1 {
+  left: 0;
+  top: 0;
+  width: 1074px;
+  height: 60px;
+  overflow: hidden;
+}
+
+.how-to-order-step-1 {
+  left: 0;
+  top: 4px;
+  width: 60px;
+  height: 44px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 30px;
+  font-weight: 400;
+  color: #285f8d;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.how-to-order-step-1-text {
+  left: 88px;
+  top: 0;
+  width: 986px;
+  height: 30px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 21px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.how-to-order-step-1-desc {
+  left: 88px;
+  top: 37px;
+  width: 980px;
+  height: 23px;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.step-2 {
+  left: 0;
+  top: 140px;
+  width: 1074px;
+  height: 60px;
+  overflow: hidden;
+}
+
+.step-3 {
+  left: 0;
+  top: 280px;
+  width: 1074px;
+  height: 83px;
+  overflow: hidden;
+}
+
+.how-to-order-step-3-desc {
+  left: 88px;
+  top: 37px;
+  width: 980px;
+  height: 46px;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: justify;
+  white-space: pre-wrap;
+}
+
+.step-4 {
+  left: 0;
+  top: 420px;
+  width: 1074px;
+  height: 83px;
+  overflow: hidden;
+}
+
+.step-5 {
+  left: 0;
+  top: 560px;
+  width: 1074px;
+  height: 83px;
+  overflow: hidden;
+}
+
+.how-to-order-step-5-desc {
+  left: 88px;
+  top: 37px;
+  width: 980px;
+  height: 46px;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.about-us-words {
+  left: 640px;
+  top: 2670px;
+  width: 568px;
+  height: 522px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: justify;
+  white-space: pre-wrap;
+}
+
+.contact-us-label {
+  left: 64px;
+  top: 3328px;
+  width: 500px;
+  height: 64px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 44px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.45;
+  letter-spacing: -0.03em;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.contact-words {
+  left: 65px;
+  top: 3432px;
+  width: 456px;
+  height: 145px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: justify;
+  white-space: pre-wrap;
+}
+
+.contact-us-button {
+  left: 158px;
+  top: 3632px;
+  width: 270px;
+  height: 64px;
+  overflow: hidden;
+}
+
+.cta-container {
+  left: 0;
+  top: 0;
+  width: 270px;
+  height: 64px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #91c7f0;
+  box-shadow: inset 0 0 0 1px #204b70;
+}
+
+.cta-text {
+  left: 0;
+  top: 0;
+  width: 270px;
+  height: 64px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: center;
+  white-space: pre-wrap;
+  display: grid;
+  align-content: center;
+}
+
+.instagram-icon {
+  left: 64px;
+  top: 3632px;
+  width: 84px;
+  height: 64px;
+  overflow: hidden;
+}
+
+.instgaram-logo-container {
+  left: 0;
+  top: 0;
+  width: 84px;
+  height: 64px;
+  border-radius: 16px 16px 16px 16px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #466c8c;
+}
+
+.akar-icons-instagram-fill {
+  left: 23px;
+  top: 13px;
+  width: 38px;
+  height: 38px;
+}
+
+.vector {
+  left: 1.58px;
+  top: 1.58px;
+  width: 34.83px;
+  height: 34.83px;
+  overflow: visible;
+  fill: #e07ae2;
+}
+
+.iframe-instagram {
+  left: 594px;
+  top: 3274px;
+  width: 634px;
+  height: 579px;
+  overflow: hidden;
+}
+
+.iframe-container {
+  left: 0;
+  top: 0;
+  width: 634px;
+  height: 579px;
+  border-radius: 24px 24px 24px 24px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #a9cde8, 0 8px 24px -4px rgba(78, 133, 174, 0.07);
+}
+
+.profil-picture {
+  left: 31px;
+  top: 53px;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background-image: url(images/profil-instagram-sweena.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: inset 0 0 0 1px #8dbbde;
+}
+
+.username {
+  left: 129px;
+  top: 38px;
+  width: 106px;
+  height: 29px;
+  font-family: 'Inter', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.alternate-name {
+  left: 130px;
+  top: 68px;
+  width: 178px;
+  height: 29px;
+  font-family: 'Inter', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.acount-details {
+  left: 130px;
+  top: 103px;
+  width: 165px;
+  height: 23px;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.instagram-post {
+  left: 0;
+  top: 162px;
+  width: 634px;
+  height: 417px;
+  border-radius: 0 0 24px 24px;
+  background-image: url(images/postingan-instagram.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.akar-icons-instagram-fill-2 {
+  left: 567px;
+  top: 30px;
+  width: 38px;
+  height: 38px;
+}
+
+.cta-box {
+  left: 64px;
+  top: 3912px;
+  width: 1152px;
+  height: 306px;
+  overflow: hidden;
+}
+
+.cta-container-2 {
+  left: 0;
+  top: 0;
+  width: 1152px;
+  height: 306px;
+  border-radius: 28px 28px 28px 28px;
+  background-color: #d0e9fc;
+  box-shadow: inset 0 0 0 1px #204b70;
+}
+
+.pesan-sekarang {
+  left: 111px;
+  top: 210px;
+  width: 465px;
+  height: 67px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #91c7f0;
+  box-shadow: inset 0 0 0 2px #204b70;
+  overflow: hidden;
+}
+
+.pesan-sekarang-2 {
+  left: 137.5px;
+  top: 16px;
+  width: 190px;
+  height: 35px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 23px;
+  font-weight: 600;
+  color: #204b70;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre;
+}
+
+.konsultasi-melalui-dm {
+  left: 604px;
+  top: 210px;
+  width: 469px;
+  height: 67px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #e07ae2;
+  box-shadow: inset 0 0 0 2px #204b70;
+  overflow: hidden;
+}
+
+.konsultasi-melalui-dm-2 {
+  left: 112px;
+  top: 17px;
+  width: 245px;
+  height: 33px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre;
+}
+
+.cta-desc {
+  left: 159px;
+  top: 125.34px;
+  width: 844px;
+  height: 56.46px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: center;
+  white-space: pre-wrap;
+}
+
+.cta-text-2 {
+  left: 53px;
+  top: 39.52px;
+  width: 1088px;
+  height: 76.78px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 47px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.45;
+  letter-spacing: -0.03em;
+  text-align: center;
+  white-space: pre-wrap;
+}
+
+.footer {
+  left: 0;
+  top: 4265px;
+  width: 1323px;
+  height: 220px;
+  overflow: hidden;
+}
+
+.footer-container {
+  left: 11px;
+  top: 0;
+  width: 1280px;
+  height: 220px;
+  background-color: #e7f5ff;
+}
+
+.sweena-logo-footer {
+  left: 75px;
+  top: 32px;
+  width: 180px;
+  height: 91.2px;
+  background-image: url(images/logo-sweena.png);
+  background-size: 216.87px 216.11px;
+  background-position: -20.82px -57.05px;
+  background-repeat: no-repeat;
+}
+
+.tagline-footer {
+  left: 80px;
+  top: 144px;
+  width: 560px;
+  height: 24px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 22px;
+  letter-spacing: 0.04em;
+  text-align: left;
+  white-space: pre-wrap;
+  display: grid;
+  align-content: center;
+}
+
+.copyright {
+  left: 1010px;
+  top: 152px;
+  width: 221px;
+  height: 24px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 20px;
+  text-align: center;
+  white-space: pre-wrap;
+  display: grid;
+  align-content: center;
+}
+
+.footer-instagram {
+  left: 1018px;
+  top: 62px;
+  width: 305px;
+  height: 74px;
+  overflow: hidden;
+}
+
+.instagram-icon-surface {
+  left: 0;
+  top: 30px;
+  width: 47.93px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: #f7fbff;
+}
+
+.instagram-username {
+  left: 65.36px;
+  top: 30px;
+  width: 239.64px;
+  height: 44px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: #204b70;
+  line-height: 26px;
+  text-align: left;
+  white-space: pre-wrap;
+  display: grid;
+  align-content: center;
+}
+
+.akar-icons-instagram-fill-3 {
+  left: 11.44px;
+  top: 39.48px;
+  width: 25.05px;
+  height: 25.05px;
+}
+
+.vector-2 {
+  left: 1.04px;
+  top: 1.04px;
+  width: 22.96px;
+  height: 22.96px;
+  overflow: visible;
+  fill: #285f8d;
+}
+
+.instagram-section-label {
+  left: 0;
+  top: 0;
+  width: 305px;
+  height: 18px;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: #204b70;
+  line-height: 18px;
+  letter-spacing: 0.12em;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.footer-line {
+  left: 0;
+  top: 2px;
+  width: 1280px;
+  height: 0;
+  border-top: 1px solid #466c8c;
+}
+
+.sweena-logo {
+  left: 344px;
+  top: 298px;
+  width: 591px;
+  height: 302px;
+  background-image: url(images/logo-sweena.png);
+  background-size: 712.05px 715.64px;
+  background-position: -68.36px -188.93px;
+  background-repeat: no-repeat;
+}
+
+.greetings {
+  left: 500px;
+  top: 285px;
+  width: 316px;
+  height: 25px;
+  font-family: 'Inter', sans-serif;
+  font-size: 17px;
+  font-weight: 500;
+  color: #285f8d;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.slogan {
+  left: 408px;
+  top: 610px;
+  width: 491px;
+  height: 25px;
+  font-family: 'Inter', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #285f8d;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.retro-line {
+  color: #e07ae2;
+  left: -244px;
+  top: 140px;
+  width: 1680px;
+  height: 28px;
+  overflow: hidden;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.retro-line-2 {
+  color: #e07ae2;
+  left: -230px;
+  top: 745px;
+  width: 1680px;
+  height: 28px;
+  overflow: hidden;
+}
+
+.rectangle-121 {
+  left: 61px;
+  top: 1011px;
+  width: 759px;
+  height: 313px;
+  border-radius: 32px 32px 32px 32px;
+  background-color: #ffffff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+}
+
+.artificial-flower-adalah-bunga-tiruan-atau-replika-yang-dibuat-dari-bahan-sintetis-maupun-non-organik-agar-menyerupai-bunga-asli {
+  left: 320px;
+  top: 1134px;
+  width: 458px;
+  height: 128px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 21px;
+  font-weight: 400;
+  font-style: italic;
+  color: #000000;
+  line-height: 1.5;
+  text-align: justify;
+  white-space: pre-wrap;
+}
+
+.artificial-flower {
+  left: 320px;
+  top: 1068px;
+  width: 308px;
+  height: 47px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 31px;
+  font-weight: 400;
+  font-style: italic;
+  color: #285f8d;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.artificial-flower-2 {
+  left: 876px;
+  top: 1055px;
+  width: 308px;
+  height: 216px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 72px;
+  font-weight: 400;
+  font-style: italic;
+  color: #285f8d;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.pipe-cleaner-flower {
+  left: 77px;
+  top: 1417px;
+  width: 308px;
+  height: 174px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 72px;
+  font-weight: 400;
+  font-style: italic;
+  color: #285f8d;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.artificial-flower-ilust {
+  left: 112px;
+  top: 1068px;
+  width: 177px;
+  height: 177px;
+  border-radius: 16px 16px 16px 16px;
+  background-image: url(images/kategori-artificial-flower.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: inset 0 0 0 3px #466c8c;
+}
+
+.fluent-collections-empty-16-filled {
+  left: 250px;
+  top: 1076px;
+  width: 33px;
+  height: 33px;
+}
+
+.vector-3 {
+  left: -3.94px;
+  top: 5.06px;
+  width: 28.87px;
+  height: 28.87px;
+  overflow: visible;
+  fill: #ffffff;
+}
+
+.rectangle-122 {
+  left: 408px;
+  top: 1365px;
+  width: 806px;
+  height: 313px;
+  border-radius: 32px 32px 32px 32px;
+  background-color: #ffffff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+}
+
+.pipe-cleaner-flower-adalah-kerajinan-tangan-populer-yang-menggunakan-kawat-fleksibel-berbulu-halus-untuk-dibentuk-menjadi-berbagai-replika-bunga-yang-estetis-berwarna-warni-dan-tahan-lama {
+  left: 453px;
+  top: 1472px;
+  width: 509px;
+  height: 160px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 21px;
+  font-weight: 400;
+  font-style: italic;
+  color: #000000;
+  line-height: 1.5;
+  text-align: justify;
+  white-space: pre-wrap;
+}
+
+.pipe-cleaner-flower-2 {
+  left: 460px;
+  top: 1411px;
+  width: 308px;
+  height: 47px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 31px;
+  font-weight: 400;
+  font-style: italic;
+  color: #285f8d;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.artificial-flower-ilust-2 {
+  left: 990px;
+  top: 1444px;
+  width: 177px;
+  height: 177px;
+  border-radius: 16px 16px 16px 16px;
+  background-image: url(images/kategori-pipe-cleaner-flower.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: inset 0 0 0 3px #466c8c;
+}
+
+.fluent-collections-empty-16-filled-2 {
+  left: 1128px;
+  top: 1452px;
+  width: 33px;
+  height: 33px;
+}
+
+.navbar {
+  left: 64px;
+  top: 24px;
+  width: 1171px;
+  height: 87px;
+  filter: drop-shadow(0 4px 4px rgba(78, 133, 174, 0.25));
+  overflow: hidden;
+}
+
+.navbar-container {
+  left: 272px;
+  top: 11px;
+  width: 690px;
+  height: 76px;
+  border-radius: 48px 48px 48px 48px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #a9cde8, 0 8px 24px -4px rgba(78, 133, 174, 0.07);
+}
+
+.selected {
+  left: 292px;
+  top: 25px;
+  width: 130px;
+  height: 48px;
+  border-radius: 24px 24px 24px 24px;
+  background-color: #faaffb;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+}
+
+.how-to-order {
+  left: 626px;
+  top: 36px;
+  width: 150px;
+  height: 25px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.about-us {
+  left: 815px;
+  top: 36px;
+  width: 110px;
+  height: 25px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.cart {
+  left: 1008px;
+  top: 0;
+  width: 163px;
+  height: 81px;
+  overflow: hidden;
+}
+
+.cart-button {
+  left: 0;
+  top: 5px;
+  width: 158px;
+  height: 76px;
+  border-radius: 48px 48px 48px 48px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #5e91b8;
+}
+
+.basket {
+  left: 58px;
+  top: 22px;
+  width: 48px;
+  height: 43px;
+}
+
+.vector-4 {
+  left: 0;
+  top: 2.69px;
+  width: 48px;
+  height: 37.63px;
+  overflow: visible;
+  fill: #285f8d;
+}
+
+.amount-container {
+  left: 128px;
+  top: 0;
+  width: 35px;
+  height: 35px;
+  overflow: visible;
+  fill: #e07ae2;
+}
+
+.item-amount {
+  left: 128px;
+  top: 0;
+  width: 35px;
+  height: 35px;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: center;
+  white-space: pre-wrap;
+  display: grid;
+  align-content: center;
+}
+
+.logo {
+  left: 0;
+  top: 8px;
+  width: 231px;
+  height: 79px;
+  overflow: hidden;
+}
+
+.home-button {
+  left: 0;
+  top: 3px;
+  width: 231px;
+  height: 76px;
+  border-radius: 48px 48px 48px 48px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #5e91b8;
+}
+
+.sweena-logo-2 {
+  left: 38px;
+  top: 0;
+  width: 155px;
+  height: 79px;
+  background-image: url(images/logo-sweena.png);
+  background-size: 186.75px 187.2px;
+  background-position: -17.93px -49.42px;
+  background-repeat: no-repeat;
+}
+
+.catalog {
+  left: 482px;
+  top: 36px;
+  width: 100px;
+  height: 25px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.home {
+  left: 330px;
+  top: 36px;
+  width: 80px;
+  height: 25px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.home-2 {
+  left: 0;
+  top: 0;
+  width: 402px;
+  height: 2516px;
+  background-color: #eaf5ff;
+}
+
+.mobile-header {
+  left: 0;
+  top: 0;
+  width: 402px;
+  height: 124px;
+  background-color: #f7fbff;
+  overflow: hidden;
+}
+
+.brand-and-cart {
+  left: 0;
+  top: 64px;
+  width: 402px;
+  height: 60px;
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+.sweena-logo-3 {
+  left: 14px;
+  top: 9px;
+  width: 112px;
+  height: 40px;
+  overflow: hidden;
+}
+
+.logo-container {
+  left: 0;
+  top: 0;
+  width: 112px;
+  height: 40px;
+  border-radius: 32px 32px 32px 32px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+}
+
+.sweena-logo-4 {
+  left: 19px;
+  top: 2px;
+  width: 73px;
+  height: 37px;
+  background-image: url(images/logo-sweena.png);
+  background-size: 87.95px 87.68px;
+  background-position: -8.44px -23.15px;
+  background-repeat: no-repeat;
+}
+
+.keranjang-dan-menu {
+  left: 206px;
+  top: 8px;
+  width: 176px;
+  height: 44px;
+  overflow: hidden;
+}
+
+.buka-keranjang {
+  left: 0;
+  top: 0;
+  width: 124px;
+  height: 44px;
+  border-radius: 14px 14px 14px 14px;
+  background-color: rgba(223, 239, 255, 0);
+  overflow: hidden;
+}
+
+.cart-container {
+  left: 76px;
+  top: 6px;
+  width: 42px;
+  height: 33px;
+  border-radius: 16px 16px 16px 16px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+}
+
+.basket-2 {
+  left: 86px;
+  top: 12px;
+  width: 22px;
+  height: 19.56px;
+}
+
+.vector-5 {
+  left: 0;
+  top: 1.22px;
+  width: 22px;
+  height: 17.11px;
+  overflow: visible;
+  fill: #285f8d;
+}
+
+.item-notif {
+  left: 106px;
+  top: 3px;
+  width: 14px;
+  height: 14px;
+  overflow: hidden;
+}
+
+.amount-container-2 {
+  left: 0;
+  top: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: #91c7f0;
+}
+
+.item-amount-2 {
+  left: 0;
+  top: 0;
+  width: 14px;
+  height: 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 7px;
+  font-weight: 600;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: center;
+  white-space: pre-wrap;
+  display: grid;
+  align-content: center;
+}
+
+.buka-atau-tutup-navigasi {
+  left: 132px;
+  top: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: rgba(223, 239, 255, 0);
+  overflow: hidden;
+}
+
+.hamburger-menu-container {
+  left: 1px;
+  top: 6px;
+  width: 42px;
+  height: 33px;
+  border-radius: 16px 16px 16px 16px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+}
+
+.hamburger-icon {
+  left: 12px;
+  top: 15px;
+  width: 20px;
+  height: 14px;
+  overflow: hidden;
+}
+
+.garis-menu-1 {
+  left: 0;
+  top: 0;
+  width: 20px;
+  height: 2px;
+  border-radius: 1px 1px 1px 1px;
+  background-color: #204b70;
+}
+
+.garis-menu-2 {
+  left: 0;
+  top: 6px;
+  width: 20px;
+  height: 2px;
+  border-radius: 1px 1px 1px 1px;
+  background-color: #204b70;
+}
+
+.garis-menu-3 {
+  left: 0;
+  top: 12px;
+  width: 20px;
+  height: 2px;
+  border-radius: 1px 1px 1px 1px;
+  background-color: #204b70;
+}
+
+.full-length-page-content {
+  left: 0;
+  top: 124px;
+  width: 402px;
+  height: 2392px;
+}
+
+.scroll-content {
+  left: 0;
+  top: 0;
+  width: 402px;
+  height: 2392px;
+}
+
+.hero {
+  left: 0;
+  top: 8px;
+  width: 402px;
+  height: 298px;
+  overflow: hidden;
+}
+
+.halo-sweeners-welcome-to-sweena {
+  left: 18px;
+  top: 37px;
+  width: 362px;
+  height: 15px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  color: #285f8d;
+  line-height: 1.45;
+  text-align: center;
+  white-space: pre-wrap;
+}
+
+.bouquets-and-logo {
+  left: 22px;
+  top: 55px;
+  width: 357px;
+  height: 137px;
+}
+
+.sweena-hero-logo {
+  left: 37px;
+  top: 14px;
+  width: 288px;
+  height: 128px;
+  background-image: url(images/logo-sweena.png);
+  background-size: 346.99px 336.49px;
+  background-position: -33.31px -102.83px;
+  background-repeat: no-repeat;
+}
+
+.a-little-flower-a-lot-of-happiness {
+  left: 18px;
+  top: 190px;
+  width: 362px;
+  height: 20px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #285f8d;
+  line-height: 1.45;
+  text-align: center;
+  white-space: pre-wrap;
+}
+
+.retro-line-3 {
+  color: #dd7edc;
+  left: -4px;
+  top: 220px;
+  width: 420px;
+  height: 28px;
+  overflow: hidden;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.retro-line-4 {
+  color: #dd7edc;
+  left: -18px;
+  top: 0;
+  width: 420px;
+  height: 28px;
+  overflow: hidden;
+}
+
+.brand-marquee {
+  left: 0;
+  top: 266px;
+  width: 402px;
+  height: 32px;
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+.scrolling-brand-phrase {
+  left: 0;
+  top: 0;
+  width: 585px;
+  height: 24px;
+  overflow: hidden;
+}
+
+.celebrate-your-beautiful-moments-with-flowers {
+  left: -53px;
+  top: 9px;
+  width: 555px;
+  height: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 8px;
+  font-weight: 400;
+  color: #285f8d;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre;
+}
+
+.our-catalog {
+  left: 0;
+  top: 324px;
+  width: 402px;
+  height: 278px;
+  overflow: hidden;
+}
+
+.background-catalog {
+  left: 8px;
+  top: 0;
+  width: 374px;
+  height: 278px;
+  border-radius: 16px 16px 16px 16px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+}
+
+.our-catalog-2 {
+  left: 14px;
+  top: 12px;
+  width: 362px;
+  height: 35px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  font-style: italic;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: center;
+  white-space: pre-wrap;
+}
+
+.af {
+  left: 25px;
+  top: 65px;
+  width: 162px;
+  height: 162px;
+  overflow: hidden;
+}
+
+.artificial-flower-ilust-3 {
+  left: 0;
+  top: 0;
+  width: 162px;
+  height: 162px;
+  border-radius: 16px 16px 16px 16px;
+  background-image: url(images/kategori-artificial-flower.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: inset 0 0 0 3px #466c8c;
+}
+
+.af-2 {
+  left: 201px;
+  top: 65px;
+  width: 162px;
+  height: 162px;
+  overflow: hidden;
+}
+
+.artificial-flower-ilust-4 {
+  left: 0;
+  top: 0;
+  width: 162px;
+  height: 162px;
+  border-radius: 16px 16px 16px 16px;
+  background-image: url(images/kategori-pipe-cleaner-flower.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: inset 0 0 0 3px #466c8c;
+}
+
+.artificial-flower-3 {
+  left: 51px;
+  top: 235px;
+  width: 110px;
+  height: 21px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #285f8d;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre;
+}
+
+.pipe-cleaner-flower-3 {
+  left: 215px;
+  top: 235px;
+  width: 140px;
+  height: 21px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #285f8d;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre;
+}
+
+.fluent-collections-empty-16-filled-3 {
+  left: 157px;
+  top: 74px;
+  width: 22px;
+  height: 22px;
+}
+
+.vector-6 {
+  left: -2.62px;
+  top: 3.38px;
+  width: 19.25px;
+  height: 19.25px;
+  overflow: visible;
+  fill: #ffffff;
+}
+
+.fluent-collections-empty-16-filled-4 {
+  left: 333px;
+  top: 74px;
+  width: 22px;
+  height: 22px;
+}
+
+.how-to-order-2 {
+  left: 0;
+  top: 623px;
+  width: 402px;
+  height: 252px;
+}
+
+.how-to-order-3 {
+  left: 20px;
+  top: 0;
+  width: 154px;
+  height: 36px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  font-style: italic;
+  color: #204b70;
+  line-height: 1.5;
+  text-align: center;
+  white-space: pre;
+}
+
+.langkah-pemesanan-geser-horizontal {
+  left: 20px;
+  top: 48px;
+  width: 362px;
+  height: 204px;
+  overflow: hidden;
+}
+
+.lima-langkah-pemesanan {
+  left: 0;
+  top: 0;
+  width: 1548px;
+  height: 204px;
+  overflow: hidden;
+}
+
+.langkah-01 {
+  left: 0;
+  top: 0;
+  width: 300px;
+  height: 204px;
+  border-radius: 16px 16px 16px 16px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+  overflow: hidden;
+}
+
+.n-01 {
+  left: 17px;
+  top: 17px;
+  width: 266px;
+  height: 30px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: #285f8d;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.pilih-produk-ke-keranjang {
+  left: 17px;
+  top: 55px;
+  width: 266px;
+  height: 23px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.jelajahi-katalog-buket-untuk-melihat-model-beser {
+  left: 17px;
+  top: 86px;
+  width: 266px;
+  height: 72px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.5;
+  text-align: justify;
+  white-space: pre-wrap;
+}
+
+.langkah-02 {
+  left: 312px;
+  top: 0;
+  width: 300px;
+  height: 204px;
+  border-radius: 16px 16px 16px 16px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+  overflow: hidden;
+}
+
+.buka-keranjang-belanja-periksa-kembali-rincian {
+  left: 17px;
+  top: 86px;
+  width: 266px;
+  height: 54px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.5;
+  text-align: justify;
+  white-space: pre-wrap;
+}
+
+.langkah-03 {
+  left: 624px;
+  top: 0;
+  width: 300px;
+  height: 204px;
+  border-radius: 16px 16px 16px 16px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+  overflow: hidden;
+}
+
+.langkah-04 {
+  left: 936px;
+  top: 0;
+  width: 300px;
+  height: 204px;
+  border-radius: 16px 16px 16px 16px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+  overflow: hidden;
+}
+
+.setelah-formulir-disubmit-sistem-akan-menampilk {
+  left: 17px;
+  top: 86px;
+  width: 266px;
+  height: 90px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.5;
+  text-align: justify;
+  white-space: pre-wrap;
+}
+
+.langkah-05 {
+  left: 1248px;
+  top: 0;
+  width: 300px;
+  height: 204px;
+  border-radius: 16px 16px 16px 16px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+  overflow: hidden;
+}
+
+.about-us-2 {
+  left: 0;
+  top: 909px;
+  width: 402px;
+  height: 618px;
+  overflow: hidden;
+}
+
+.about-us-3 {
+  left: 20px;
+  top: 16px;
+  width: 91px;
+  height: 36px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  font-style: italic;
+  color: #204b70;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre;
+}
+
+.every-flower-has-its-own-story-and-every-gif {
+  left: 20px;
+  top: 58px;
+  width: 362px;
+  height: 48px;
+  font-family: 'DM Serif Text', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: #285f8d;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.pilihan-buket-dan-kreasi-hadiah {
+  left: 20px;
+  top: 124px;
+  width: 362px;
+  height: 478px;
+  border-radius: 16px 16px 16px 16px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+  overflow: hidden;
+}
+
+.kami-menyediakan-berbagai-pilihan-buket-mulai-d {
+  left: 19px;
+  top: 19px;
+  width: 324px;
+  height: 440px;
+  font-family: 'Pochaevsk', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.55;
+  text-align: justify;
+  white-space: pre-wrap;
+}
+
+.contact-us {
+  left: 0;
+  top: 1533px;
+  width: 402px;
+  height: 503px;
+  overflow: hidden;
+}
+
+.contact-us-2 {
+  left: 20px;
+  top: 0;
+  width: 362px;
+  height: 36px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  font-style: italic;
+  color: #204b70;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.lagi-cari-hadiah-untuk-wisuda-ulang-tahun-anni {
+  left: 20px;
+  top: 44px;
+  width: 346px;
+  height: 80px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.5;
+  text-align: justify;
+  white-space: pre-wrap;
+}
+
+.instagram-preview {
+  left: 20px;
+  top: 140px;
+  width: 362px;
+  height: 303px;
+  border-radius: 16px 16px 16px 16px;
+  background-color: #f7fbff;
+  overflow: hidden;
+}
+
+.profil-instagram {
+  left: 16px;
+  top: 16px;
+  width: 330px;
+  height: 42px;
+  overflow: hidden;
+}
+
+.profil-picture-2 {
+  left: 0;
+  top: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 99px 99px 99px 99px;
+  background-image: url(images/profil-instagram-sweena.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.nama-dan-statistik-instagram {
+  left: 52px;
+  top: 1px;
+  width: 248px;
+  height: 40px;
+  overflow: hidden;
+}
+
+.sweena-flo {
+  left: 0;
+  top: 0;
+  width: 248px;
+  height: 21px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #204b70;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.n-52-followers-7-posts {
+  left: 0;
+  top: 23px;
+  width: 248px;
+  height: 17px;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.akar-icons-instagram-fill-4 {
+  left: 310px;
+  top: 11px;
+  width: 20px;
+  height: 20px;
+}
+
+.vector-7 {
+  left: 0.83px;
+  top: 0.83px;
+  width: 18.33px;
+  height: 18.33px;
+  overflow: visible;
+  fill: #e07ae2;
+}
+
+.instagram-post-2 {
+  left: 16px;
+  top: 70px;
+  width: 330px;
+  height: 217px;
+  border-radius: 12px 12px 12px 12px;
+  background-image: url(images/postingan-instagram.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.dm-kami-melalui-swee-flo {
+  left: 96px;
+  top: 455px;
+  width: 280px;
+  height: 48px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #91c7f0;
+  box-shadow: inset 0 0 0 2px #204b70;
+  overflow: hidden;
+}
+
+.dm-kami-melalui-swee-flo-2 {
+  left: 51.5px;
+  top: 14px;
+  width: 177px;
+  height: 20px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre;
+}
+
+.instagram-icon-2 {
+  left: 35px;
+  top: 455px;
+  width: 53px;
+  height: 48px;
+  overflow: hidden;
+}
+
+.instgaram-logo-container-2 {
+  left: 0;
+  top: 0;
+  width: 53px;
+  height: 48px;
+  border-radius: 16px 16px 16px 16px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 2px #466c8c;
+}
+
+.akar-icons-instagram-fill-5 {
+  left: 13.43px;
+  top: 10.93px;
+  width: 26.14px;
+  height: 26.14px;
+}
+
+.vector-8 {
+  left: 1.09px;
+  top: 1.09px;
+  width: 23.96px;
+  height: 23.96px;
+  overflow: visible;
+  fill: #e07ae2;
+}
+
+.final-call-to-action {
+  left: 0;
+  top: 2072px;
+  width: 402px;
+  height: 252px;
+  overflow: hidden;
+}
+
+.pesan-atau-konsultasi {
+  left: 20px;
+  top: 0;
+  width: 362px;
+  height: 252px;
+  border-radius: 18px 18px 18px 18px;
+  background-color: #dfefff;
+  overflow: hidden;
+}
+
+.let-s-make-your-moments-more-special {
+  left: 18px;
+  top: 18px;
+  width: 326px;
+  height: 64px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 21px;
+  font-weight: 400;
+  font-style: italic;
+  color: #204b70;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.sudah-menemukan-buket-yang-pas-untuk-hadiah-nant {
+  left: 18px;
+  top: 94px;
+  width: 326px;
+  height: 80px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.5;
+  text-align: justify;
+  white-space: pre-wrap;
+}
+
+.pesan-sekarang-3 {
+  left: 18px;
+  top: 186px;
+  width: 141px;
+  height: 48px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #91c7f0;
+  box-shadow: inset 0 0 0 2px #204b70;
+  overflow: hidden;
+}
+
+.pesan-sekarang-4 {
+  left: 16.5px;
+  top: 14px;
+  width: 108px;
+  height: 20px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #204b70;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre;
+}
+
+.konsultasi-melalui-dm-3 {
+  left: 168px;
+  top: 186px;
+  width: 168px;
+  height: 48px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #dd7edc;
+  box-shadow: inset 0 0 0 2px #204b70;
+  overflow: hidden;
+}
+
+.konsultasi-melalui-dm-4 {
+  left: 11.5px;
+  top: 14px;
+  width: 145px;
+  height: 20px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #f0f8ff;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre;
+}
+
+.footer-2 {
+  left: 0;
+  top: 2348px;
+  width: 402px;
+  height: 44px;
+  overflow: hidden;
+}
+
+.copyright-2 {
+  left: 20px;
+  top: 14px;
+  width: 362px;
+  height: 16px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 16px;
+  text-align: center;
+  white-space: pre-wrap;
+}
+
+.dot-indicator {
+  left: 156px;
+  top: 896px;
+  width: 72px;
+  height: 7px;
+  overflow: hidden;
+}
+
+.rectangle-31-2 {
+  left: 0;
+  top: 1px;
+  width: 22px;
+  height: 5px;
+  border-radius: 32px 32px 32px 32px;
+  background-color: #a9cde8;
+}
+
+.ellipse-1 {
+  left: 28px;
+  top: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #a9cde8;
+}
+
+.ellipse-2 {
+  left: 41px;
+  top: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #a9cde8;
+}
+
+.ellipse-3 {
+  left: 54px;
+  top: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #a9cde8;
+}
+
+.ellipse-4 {
+  left: 65px;
+  top: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #a9cde8;
+}
+
+.side-panel {
+  left: 0;
+  top: 0;
+  width: 640px;
+  height: 536px;
+  border-radius: 24px 24px 24px 24px;
+  background-color: #f0f8ff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+  overflow: hidden;
+}
+
+.sidepanel-cart {
+  left: 0;
+  top: 0;
+  width: 640px;
+  height: 536px;
+  border-radius: 24px 24px 24px 24px;
+  background-color: #f0f8ff;
+}
+
+.cart-items {
+  left: 24px;
+  top: 132px;
+  width: 592px;
+  height: 184px;
+}
+
+.cart-item {
+  left: 0;
+  top: 0;
+  width: 592px;
+  height: 184px;
+}
+
+.cart-item-surface {
+  left: 0;
+  top: 0;
+  width: 592px;
+  height: 184px;
+  border-radius: 18px 18px 18px 18px;
+  background-color: #d0e9fc;
+}
+
+.delete-button {
+  left: 519px;
+  top: 22px;
+  width: 54px;
+  height: 48px;
+  overflow: hidden;
+}
+
+.container-delete {
+  left: 0;
+  top: 0;
+  width: 54px;
+  height: 48px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #5e91b8;
+}
+
+.ep-delete-filled {
+  left: 16px;
+  top: 13px;
+  width: 22px;
+  height: 22px;
+}
+
+.vector-9 {
+  left: 1.38px;
+  top: 1.38px;
+  width: 19.25px;
+  height: 19.25px;
+  overflow: visible;
+  fill: #285f8d;
+}
+
+.amount-button {
+  left: 388px;
+  top: 118px;
+  width: 121px;
+  height: 48px;
+  overflow: hidden;
+}
+
+.amount-container-3 {
+  left: 0;
+  top: 0;
+  width: 121px;
+  height: 48px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #91c7f0;
+  box-shadow: inset 0 0 0 1px #8dbbde;
+}
+
+.item-amount-3 {
+  left: 0;
+  top: 0;
+  width: 121px;
+  height: 48px;
+  font-family: 'Inter', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: center;
+  white-space: pre-wrap;
+  display: grid;
+  align-content: center;
+}
+
+.plus-button {
+  left: 524px;
+  top: 118px;
+  width: 45px;
+  height: 48px;
+  overflow: hidden;
+}
+
+.container {
+  left: 0;
+  top: 0;
+  width: 45px;
+  height: 48px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #5e91b8;
+}
+
+.plus-icon {
+  left: 0;
+  top: 0;
+  width: 45px;
+  height: 48px;
+  font-family: 'Inter', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #285f8d;
+  line-height: 1.45;
+  text-align: center;
+  white-space: pre-wrap;
+  display: grid;
+  align-content: center;
+}
+
+.minus-button {
+  left: 321px;
+  top: 118px;
+  width: 51px;
+  height: 48px;
+  overflow: hidden;
+}
+
+.container-2 {
+  left: 0;
+  top: 0;
+  width: 51px;
+  height: 48px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #5e91b8;
+}
+
+.minus-icon {
+  left: 0;
+  top: 0;
+  width: 51px;
+  height: 48px;
+  font-family: 'Inter', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #285f8d;
+  line-height: 1.45;
+  text-align: center;
+  white-space: pre-wrap;
+  display: grid;
+  align-content: center;
+}
+
+.product-description {
+  left: 156px;
+  top: 64px;
+  width: 127px;
+  height: 26px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre;
+}
+
+.rincian-item,
+.rincian-item * {
+  pointer-events: none; /* blok teks ini melebar menutupi tombol hapus, − dan +; klik harus tembus ke tombol */
+}
+.rincian-item {
+  left: 156px;
+  top: 22px;
+  width: 398px;
+  height: 135px;
+  overflow: hidden;
+}
+
+.nama-produk {
+  left: 0;
+  top: 0;
+  width: 398px;
+  height: 32px;
+  font-family: 'Inter', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.subtotal {
+  left: 0;
+  top: 102px;
+  width: 360px;
+  height: 33px;
+  font-family: 'Inter', sans-serif;
+  font-size: 23px;
+  font-weight: 600;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.bouquet-thumbnail {
+  left: 20px;
+  top: 22px;
+  width: 112px;
+  height: 136px;
+  border-radius: 12px 12px 12px 12px;
+  background-image: url(images/produk-blooming-aurora-bouquet.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.cart-label {
+  left: 32px;
+  top: 30px;
+  width: 450px;
+  height: 41px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 28px;
+  font-weight: 600;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.close-sidebar {
+  left: 552px;
+  top: 28px;
+  width: 41px;
+  height: 41px;
+}
+
+.vector-10 {
+  left: 8.23px;
+  top: 8.2px;
+  width: 24.61px;
+  height: 24.61px;
+  overflow: visible;
+  fill: #466c8c;
+}
+
+.line {
+  left: 0;
+  top: 108px;
+  width: 640px;
+  height: 0;
+  border-top: 1px solid #a9cde8;
+}
+
+.line-2 {
+  left: 32px;
+  top: 346px;
+  width: 576px;
+  height: 0;
+  border-top: 1px solid #a9cde8;
+}
+
+.total {
+  left: 32px;
+  top: 369px;
+  width: 576px;
+  height: 51px;
+  overflow: hidden;
+}
+
+.total-2 {
+  left: 356px;
+  top: 0;
+  width: 220px;
+  height: 51px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 35px;
+  font-weight: 400;
+  font-style: italic;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: center;
+  white-space: pre-wrap;
+}
+
+.total-label {
+  left: 0;
+  top: 5px;
+  width: 200px;
+  height: 32px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.checkout-button {
+  left: 32px;
+  top: 440px;
+  width: 576px;
+  height: 64px;
+  overflow: hidden;
+}
+
+.button-checkout {
+  left: 0;
+  top: 0;
+  width: 576px;
+  height: 64px;
+  border-radius: 14px 14px 14px 14px;
+  background-color: #91c7f0;
+}
+
+.checkout-pesanan {
+  left: 0;
+  top: 0;
+  width: 576px;
+  height: 64px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 21px;
+  font-weight: 600;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: center;
+  white-space: pre-wrap;
+  display: grid;
+  align-content: center;
+}
+
+.cart-2 {
+  left: 0;
+  top: 0;
+  width: 402px;
+  height: 874px;
+  background-color: #eaf5ff;
+  overflow: hidden;
+}
+
+.mobile-header-2 {
+  left: 0;
+  top: 0;
+  width: 402px;
+  height: 132px;
+  background-color: #f7fbff;
+  overflow: hidden;
+}
+
+.cart-header {
+  left: 0;
+  top: 64px;
+  width: 402px;
+  height: 68px;
+  background-color: #f7fbff;
+  overflow: hidden;
+}
+
+.icon-button {
+  left: 20px;
+  top: 12px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px 12px 12px 12px;
+  overflow: hidden;
+}
+
+.back {
+  left: 11px;
+  top: 11px;
+  width: 22px;
+  height: 22px;
+}
+
+.vector-11 {
+  left: 7.33px;
+  top: 4.58px;
+  width: 6.42px;
+  height: 12.83px;
+  overflow: visible;
+  fill: #285f8d;
+}
+
+.keranjangmu {
+  left: 76px;
+  top: 18px;
+  width: 306px;
+  height: 32px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 22px;
+  font-weight: 400;
+  font-style: italic;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.vertical-scroll-viewport {
+  left: 0;
+  top: 132px;
+  width: 402px;
+  height: 615px;
+  overflow: hidden;
+}
+
+.scroll-content-2 {
+  left: 0;
+  top: 0;
+  width: 402px;
+  height: 242px;
+  overflow: hidden;
+}
+
+.cart-items-2 {
+  left: 20px;
+  top: 20px;
+  width: 362px;
+  height: 198px;
+}
+
+.cart-item-2 {
+  left: 0;
+  top: 0;
+  width: 362px;
+  height: 198px;
+}
+
+.rincian-produk-dalam-keranjang {
+  left: 0;
+  top: 0;
+  width: 362px;
+  height: 198px;
+  border-radius: 18px 18px 18px 18px;
+  background-color: #d0e9fc;
+  overflow: hidden;
+}
+
+.foto-dan-informasi-produk {
+  left: 16px;
+  top: 16px;
+  width: 330px;
+  height: 106px;
+  overflow: hidden;
+}
+
+.foto-produk-keranjang {
+  left: 0;
+  top: 0;
+  width: 84px;
+  height: 106px;
+  border-radius: 12px 12px 12px 12px;
+  background-image: url(images/produk-blooming-aurora-bouquet.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.informasi-produk {
+  left: 96px;
+  top: 0;
+  width: 234px;
+  height: 76px;
+  overflow: hidden;
+}
+
+.blooming-aurora-bouquet {
+  left: 0;
+  top: 0;
+  width: 234px;
+  height: 22px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.flower-description-goes-here {
+  left: 0;
+  top: 28px;
+  width: 234px;
+  height: 17px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.rp-180-000 {
+  left: 0;
+  top: 51px;
+  width: 234px;
+  height: 25px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.hapus-dan-ubah-jumlah {
+  left: 16px;
+  top: 138px;
+  width: 330px;
+  height: 44px;
+  overflow: hidden;
+}
+
+.hapus-produk {
+  left: 0;
+  top: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #204b70;
+  overflow: hidden;
+}
+
+.ep-delete-filled-2 {
+  left: 12.5px;
+  top: 12.5px;
+  width: 19px;
+  height: 19px;
+}
+
+.vector-12 {
+  left: 1.19px;
+  top: 1.19px;
+  width: 16.62px;
+  height: 16.62px;
+  overflow: visible;
+  fill: #285f8d;
+}
+
+.kontrol-jumlah {
+  left: 174px;
+  top: 0;
+  width: 156px;
+  height: 44px;
+  overflow: hidden;
+}
+
+.layer {
+  left: 0;
+  top: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #000000;
+  overflow: hidden;
+}
+
+.layer-2 {
+  left: 17px;
+  top: 12px;
+  width: 10px;
+  height: 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre;
+}
+
+.n-2 {
+  left: 52px;
+  top: 0;
+  width: 52px;
+  height: 44px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #91c7f0;
+  box-shadow: inset 0 0 0 1px #000000;
+  overflow: hidden;
+}
+
+.n-2-2 {
+  left: 21.5px;
+  top: 12px;
+  width: 9px;
+  height: 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre;
+}
+
+.layer-3 {
+  left: 112px;
+  top: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #000000;
+  overflow: hidden;
+}
+
+.bottom-actions {
+  left: 0;
+  top: 747px;
+  width: 402px;
+  height: 127px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #204b70;
+  overflow: hidden;
+}
+
+.total-belanja {
+  left: 21px;
+  top: 17px;
+  width: 360px;
+  height: 29px;
+  overflow: hidden;
+}
+
+.total-3 {
+  left: 0;
+  top: 0;
+  width: 33px;
+  height: 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre;
+}
+
+.rp-180-000-2 {
+  left: 265px;
+  top: 0;
+  width: 95px;
+  height: 29px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  font-style: italic;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre;
+}
+
+.checkout-pesanan-2 {
+  left: 21px;
+  top: 58px;
+  width: 360px;
+  height: 48px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #91c7f0;
+  box-shadow: inset 0 0 0 1px #204b70;
+  overflow: hidden;
+}
+
+.checkout-pesanan-3 {
+  left: 116.5px;
+  top: 14px;
+  width: 127px;
+  height: 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre;
+}
+
+
+/* ============ Halaman: kategori-artificial (hasil konversi desain Figma) ============ */
+
+.kategori-af {
+  left: 0;
+  top: 0;
+  width: 1280px;
+  height: 1545px;
+  border-radius: 24px 24px 24px 24px;
+  background-color: #ffffff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+  overflow: hidden;
+}
+
+.detail-produk {
+  left: 106px;
+  top: 40px;
+  width: 364px;
+  height: 64px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 44px;
+  font-weight: 400;
+  font-style: italic;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.back-2 {
+  left: 44px;
+  top: 51px;
+  width: 41px;
+  height: 41px;
+}
+
+.vector-13 {
+  left: 13.65px;
+  top: 8.54px;
+  width: 11.96px;
+  height: 23.92px;
+  overflow: visible;
+  fill: #285f8d;
+}
+
+.card-product-mawar {
+  left: 85px;
+  top: 269.71px;
+  width: 270.02px;
+  height: 367.29px;
+  overflow: hidden;
+}
+
+.product-card {
+  left: 0;
+  top: 0px;
+  width: 270.02px;
+  height: 367.29px;
+  border-radius: 16px 16px 16px 16px;
+  background-color: #ffffff;
+  box-shadow: inset 0 0 0 1px #204b70;
+}
+
+.mawar {
+  left: 16.77px;
+  top: 20.13px;
+  width: 229.77px;
+  height: 234.8px;
+  border-radius: 4px 4px 4px 4px;
+  background-image: url(images/produk-mawar.jpg);
+  background-size: 298.48px 504.13px;
+  background-position: -31.23px -108.46px;
+  background-repeat: no-repeat;
+}
+
+.nama-produk-2 {
+  left: 18.45px;
+  top: 269.05px;
+  width: 72.12px;
+  height: 30.19px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #000000;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.harga {
+  left: 18.45px;
+  top: 313.63px;
+  width: 117.4px;
+  height: 35.22px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #000000;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.add-button {
+  left: 213px;
+  top: 306.92px;
+  width: 41.93px;
+  height: 41.93px;
+  overflow: hidden;
+}
+
+.add-button-2 {
+  left: 0;
+  top: 0;
+  width: 41.93px;
+  height: 41.93px;
+  border-radius: 4px 4px 4px 4px;
+  background-color: #a9cde8;
+  box-shadow: inset 0 0 0 1px #466c8c;
+}
+
+.layer-4 {
+  left: 13.42px;
+  top: 5.03px;
+  width: 16.77px;
+  height: 35.22px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 22px;
+  font-weight: 300;
+  color: #204b70;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.card-product-blooming-tulip {
+  left: 401.98px;
+  top: 272.69px;
+  width: 270.02px;
+  height: 364.31px;
+  overflow: hidden;
+}
+
+.product-card-2 {
+  left: 0px;
+  top: 0px;
+  width: 270.02px;
+  height: 364.31px;
+  border-radius: 16px 16px 16px 16px;
+  background-color: #ffffff;
+  box-shadow: inset 0 0 0 1px #204b70;
+}
+
+.mawar-2 {
+  left: 18.45px;
+  top: 20.5px;
+  width: 229.77px;
+  height: 231.45px;
+  border-radius: 4px 4px 4px 4px;
+  background-image: url(images/produk-blooming-tulip.jpg);
+  background-size: 251.98px 419.51px;
+  background-position: -10.4px -28.81px;
+  background-repeat: no-repeat;
+}
+
+.nama-produk-3 {
+  left: 18.45px;
+  top: 267.51px;
+  width: 152.62px;
+  height: 31.68px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #000000;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.harga-2 {
+  left: 18.45px;
+  top: 307.99px;
+  width: 117.4px;
+  height: 36.96px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #000000;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.add-button-3 {
+  left: 213px;
+  top: 300.95px;
+  width: 41.93px;
+  height: 44px;
+  overflow: hidden;
+}
+
+.add-button-4 {
+  left: 0;
+  top: 0;
+  width: 41.93px;
+  height: 44px;
+  border-radius: 4px 4px 4px 4px;
+  background-color: #91c7f0;
+  box-shadow: inset 0 0 0 1px #204b70;
+}
+
+.layer-5 {
+  left: 13.42px;
+  top: 5.28px;
+  width: 16.77px;
+  height: 36.96px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 22px;
+  font-weight: 300;
+  color: #204b70;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.single {
+  left: 87px;
+  top: 189px;
+  width: 104px;
+  height: 59px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 40px;
+  font-weight: 400;
+  font-style: italic;
+  color: #000000;
+  line-height: 1.45;
+  text-align: center;
+  white-space: pre-wrap;
+}
+
+.card-product-mawar-2 {
+  left: 87px;
+  top: 772.71px;
+  width: 270.02px;
+  height: 367.29px;
+  overflow: hidden;
+}
+
+.mawar-3 {
+  left: 19.77px;
+  top: 20.13px;
+  width: 229.77px;
+  height: 234.8px;
+  border-radius: 4px 4px 4px 4px;
+  background-image: url(images/produk-sunny-sky-petals.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.nama-produk-4 {
+  left: 18px;
+  top: 269.29px;
+  width: 195px;
+  height: 30px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #000000;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.harga-3 {
+  left: 18.45px;
+  top: 313.63px;
+  width: 117.4px;
+  height: 33px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #000000;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.bouquet {
+  left: 89px;
+  top: 692px;
+  width: 209px;
+  height: 59px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 40px;
+  font-weight: 400;
+  font-style: italic;
+  color: #000000;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.cart-3 {
+  left: 1063px;
+  top: 46px;
+  width: 163px;
+  height: 81px;
+  overflow: hidden;
+}
+
+.footer-3 {
+  left: -5px;
+  top: 1325px;
+  width: 1323px;
+  height: 220px;
+  overflow: hidden;
+}
+
+.retro-line-5 {
+  color: #5e91b8;
+  left: -183px;
+  top: 1295px;
+  width: 1680px;
+  height: 28px;
+  overflow: hidden;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.katalog-af {
+  left: 0;
+  top: 0;
+  width: 402px;
+  height: 874px;
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+.frame-2 {
+  left: 20px;
+  top: 12px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: rgba(223, 239, 255, 0);
+  overflow: hidden;
+}
+
+.detail-produk-2 {
+  left: 76px;
+  top: 18px;
+  width: 250px;
+  height: 32px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 22px;
+  font-weight: 400;
+  font-style: italic;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+/* badge jumlah item pada ikon keranjang mobile (kelas lain yang dipakai: .amount-container-2, .item-amount-2) */
+.item-notif-2 {
+  left: 30px;
+  top: 3px;
+  width: 14px;
+  height: 14px;
+  overflow: hidden;
+}
+.frame-3 {
+  left: 338px;
+  top: 12px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px 12px 12px 12px;
+  overflow: hidden;
+}
+
+.basket-3 {
+  left: 11px;
+  top: 12.22px;
+  width: 22px;
+  height: 19.56px;
+}
+
+.vertical-scroll-viewport-2 {
+  left: 0;
+  top: 132px;
+  width: 402px;
+  height: 742px;
+  overflow: hidden;
+}
+
+.card-product-mawar-3 {
+  left: 26px;
+  top: 72px;
+  width: 161px;
+  height: 219px;
+  overflow: hidden;
+}
+
+.product-card-3 {
+  left: 0;
+  top: 0;
+  width: 161px;
+  height: 219px;
+  border-radius: 16px 16px 16px 16px;
+  background-color: #ffffff;
+  box-shadow: inset 0 0 0 1px #204b70;
+}
+
+.mawar-4 {
+  left: 10px;
+  top: 12px;
+  width: 137px;
+  height: 140px;
+  border-radius: 4px 4px 4px 4px;
+  background-image: url(images/produk-mawar.jpg);
+  background-size: 177.97px 300.59px;
+  background-position: -18.62px -64.67px;
+  background-repeat: no-repeat;
+}
+
+.nama-produk-5 {
+  left: 11px;
+  top: 164px;
+  width: 43px;
+  height: 18px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #000000;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre;
+}
+
+.harga-4 {
+  left: 11px;
+  top: 187px;
+  width: 70px;
+  height: 21px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #000000;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre;
+}
+
+.add-button-5 {
+  left: 127px;
+  top: 183px;
+  width: 25px;
+  height: 25px;
+  overflow: hidden;
+}
+
+.add-button-6 {
+  left: 0;
+  top: 0;
+  width: 25px;
+  height: 25px;
+  border-radius: 4px 4px 4px 4px;
+  background-color: #a9cde8;
+  box-shadow: inset 0 0 0 1px #466c8c;
+}
+
+.layer-6 {
+  left: 8px;
+  top: 3px;
+  width: 10px;
+  height: 21px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  color: #204b70;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre;
+}
+
+.card-product-mawar-4 {
+  left: 22px;
+  top: 399px;
+  width: 161px;
+  height: 217px;
+  overflow: hidden;
+}
+
+.product-card-4 {
+  left: 0;
+  top: 0;
+  width: 161px;
+  height: 217px;
+  border-radius: 16px 16px 16px 16px;
+  background-color: #ffffff;
+  box-shadow: inset 0 0 0 1px #204b70;
+}
+
+.mawar-5 {
+  left: 12px;
+  top: 13px;
+  width: 137px;
+  height: 134px;
+  border-radius: 4px 4px 4px 4px;
+  background-image: url(images/produk-sunny-sky-petals.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.nama-produk-6 {
+  left: 11px;
+  top: 162px;
+  width: 104px;
+  height: 18px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #000000;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre;
+}
+
+.harga-5 {
+  left: 11px;
+  top: 185px;
+  width: 71px;
+  height: 21px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #000000;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre;
+}
+
+.add-button-7 {
+  left: 127px;
+  top: 181px;
+  width: 25px;
+  height: 25px;
+  overflow: hidden;
+}
+
+.card-product-blooming-tulip-2 {
+  left: 215px;
+  top: 73.78px;
+  width: 161px;
+  height: 217.22px;
+  overflow: hidden;
+}
+
+.product-card-5 {
+  left: 0;
+  top: 0;
+  width: 161px;
+  height: 217.22px;
+  border-radius: 16px 16px 16px 16px;
+  background-color: #ffffff;
+  box-shadow: inset 0 0 0 1px #204b70;
+}
+
+.mawar-6 {
+  left: 11px;
+  top: 12.22px;
+  width: 137px;
+  height: 138px;
+  border-radius: 4px 4px 4px 4px;
+  background-image: url(images/produk-blooming-tulip.jpg);
+  background-size: 150.24px 250.13px;
+  background-position: -6.2px -17.18px;
+  background-repeat: no-repeat;
+}
+
+.nama-produk-7 {
+  left: 11px;
+  top: 159.5px;
+  width: 91px;
+  height: 18.89px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #000000;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.harga-6 {
+  left: 11px;
+  top: 183.64px;
+  width: 70px;
+  height: 22.04px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #000000;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.add-button-8 {
+  left: 127px;
+  top: 179.44px;
+  width: 25px;
+  height: 26.23px;
+  overflow: hidden;
+}
+
+.add-button-9 {
+  left: 0;
+  top: 0;
+  width: 25px;
+  height: 26.23px;
+  border-radius: 4px 4px 4px 4px;
+  background-color: #91c7f0;
+  box-shadow: inset 0 0 0 1px #204b70;
+}
+
+.layer-7 {
+  left: 8px;
+  top: 3.15px;
+  width: 10px;
+  height: 22.04px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  color: #204b70;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.single-2 {
+  left: 27px;
+  top: 24px;
+  width: 62px;
+  height: 35px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  font-style: italic;
+  color: #000000;
+  line-height: 1.45;
+  text-align: center;
+  white-space: pre;
+}
+
+.bouquet-2 {
+  left: 16px;
+  top: 343px;
+  width: 86px;
+  height: 35px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  font-style: italic;
+  color: #000000;
+  line-height: 1.45;
+  text-align: center;
+  white-space: pre;
+}
+
+.footer-4 {
+  left: -2px;
+  top: 698px;
+  width: 402px;
+  height: 44px;
+  overflow: hidden;
+}
+
+.retro-line-6 {
+  color: #5e91b8;
+  left: -9px;
+  top: 670px;
+  width: 420px;
+  height: 28px;
+  overflow: hidden;
+}
+
+.add-to-cart-message {
+  left: 0;
+  top: 0;
+  width: 652px;
+  height: 85px;
+  border-radius: 16px 16px 16px 16px;
+}
+
+.notification-container {
+  left: 0;
+  top: 0;
+  width: 652px;
+  height: 85px;
+  border-radius: 14px 14px 14px 14px;
+  background-color: #91c7f0;
+  box-shadow: inset 0 0 0 1px #78b1da, 0 4px 16px -4px rgba(78, 133, 174, 0.08);
+}
+
+.success-message {
+  left: 92px;
+  top: 0;
+  width: 425px;
+  height: 85px;
+  font-family: 'Inter', sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  color: #204b70;
+  line-height: 1.21;
+  text-align: left;
+  white-space: pre-wrap;
+  display: grid;
+  align-content: center;
+}
+
+.charm-tick {
+  left: 533px;
+  top: 29px;
+  width: 28px;
+  height: 28px;
+}
+
+/* centang pada notifikasi: digambar dengan garis (bukan isian) */
+.vector-14,
+.vector-15 {
+  stroke: #204b70;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.vector-14 {
+  left: 4.81px;
+  top: 8.31px;
+  width: 18.38px;
+  height: 13.12px;
+  overflow: visible;
+  fill: none;
+}
+
+.download-receipt-as-image {
+  left: 0;
+  top: 0;
+  width: 475px;
+  height: 85px;
+  border-radius: 16px 16px 16px 16px;
+}
+
+.notification-container-2 {
+  left: 0;
+  top: 0;
+  width: 488px;
+  height: 85px;
+  border-radius: 14px 14px 14px 14px;
+  background-color: #91c7f0;
+  box-shadow: inset 0 0 0 1px #78b1da, 0 4px 16px -4px rgba(78, 133, 174, 0.08);
+}
+
+.success-message-2 {
+  left: 56px;
+  top: 1px;
+  width: 336px;
+  height: 85px;
+  font-family: 'Inter', sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  color: #204b70;
+  line-height: 1.21;
+  text-align: left;
+  white-space: pre-wrap;
+  display: grid;
+  align-content: center;
+}
+
+.charm-tick-2 {
+  left: 392px;
+  top: 29px;
+  width: 28px;
+  height: 28px;
+}
+
+.notif-success-add-to-cart {
+  left: 0;
+  top: 0;
+  width: 231px;
+  height: 46px;
+  border-radius: 16px 16px 16px 16px;
+  background-color: #91c7f0;
+  box-shadow: inset 0 0 0 1px #5e91b8;
+  overflow: hidden;
+}
+
+.pesanan-berhasil-ditambahkan-ke-keranjang {
+  left: 17px;
+  top: 17px;
+  width: 168px;
+  height: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 8px;
+  font-weight: 500;
+  color: #204b70;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.charm-tick-3 {
+  left: 197px;
+  top: 11px;
+  width: 24px;
+  height: 24px;
+}
+
+.vector-15 {
+  left: 4.12px;
+  top: 7.12px;
+  width: 15.75px;
+  height: 11.25px;
+  overflow: visible;
+  fill: none;
+}
+
+.notif-success-download-struk {
+  left: 0;
+  top: 0;
+  width: 224px;
+  height: 45px;
+  border-radius: 16px 16px 16px 16px;
+  background-color: #91c7f0;
+  box-shadow: inset 0 0 0 1px #5e91b8;
+  overflow: hidden;
+}
+
+.struk-belanja-berhasil-didownload {
+  left: 17px;
+  top: 15.5px;
+  width: 154px;
+  height: 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 9px;
+  font-weight: 500;
+  color: #204b70;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.charm-tick-4 {
+  left: 183px;
+  top: 10.5px;
+  width: 24px;
+  height: 24px;
+}
+
+
+/* ============ Halaman: kategori-pipecleaner (hasil konversi desain Figma) ============ */
+
+.detail-produk-3 {
+  left: 106px;
+  top: 40px;
+  width: 544px;
+  height: 64px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 44px;
+  font-weight: 400;
+  font-style: italic;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.mawar-7 {
+  left: 16.77px;
+  top: 20.13px;
+  width: 229.77px;
+  height: 234.8px;
+  border-radius: 4px 4px 4px 4px;
+  background-image: url(images/produk-sunflower.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.nama-produk-8 {
+  left: 18px;
+  top: 269.29px;
+  width: 118px;
+  height: 30px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #000000;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.mawar-8 {
+  left: 19.77px;
+  top: 20.13px;
+  width: 229.77px;
+  height: 234.8px;
+  border-radius: 4px 4px 4px 4px;
+  background-image: url(images/produk-happy-bloom.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.amount-container-4 {
+  left: 128px;
+  top: 0;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background-color: #e07ae2;
+}
+
+.retro-line-7 {
+  color: #5e91b8;
+  left: -183px;
+  top: 1297px;
+  width: 1680px;
+  height: 28px;
+  overflow: hidden;
+}
+
+.card-product-mawar-5 {
+  left: 17px;
+  top: 204px;
+  width: 161px;
+  height: 219px;
+  overflow: hidden;
+}
+
+.mawar-9 {
+  left: 10px;
+  top: 12px;
+  width: 137px;
+  height: 140px;
+  border-radius: 4px 4px 4px 4px;
+  background-image: url(images/produk-sunflower.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.nama-produk-9 {
+  left: 11px;
+  top: 164px;
+  width: 61px;
+  height: 18px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #000000;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre;
+}
+
+.single-3 {
+  left: 18px;
+  top: 156px;
+  width: 62px;
+  height: 35px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  font-style: italic;
+  color: #000000;
+  line-height: 1.45;
+  text-align: center;
+  white-space: pre;
+}
+
+.card-product-mawar-6 {
+  left: 25px;
+  top: 531px;
+  width: 161px;
+  height: 217px;
+  overflow: hidden;
+}
+
+.mawar-10 {
+  left: 12px;
+  top: 13px;
+  width: 137px;
+  height: 134px;
+  border-radius: 4px 4px 4px 4px;
+  background-image: url(images/produk-happy-bloom.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.nama-produk-10 {
+  left: 11px;
+  top: 162px;
+  width: 83px;
+  height: 18px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #000000;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre;
+}
+
+.bouquet-3 {
+  left: 19px;
+  top: 475px;
+  width: 86px;
+  height: 35px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  font-style: italic;
+  color: #000000;
+  line-height: 1.45;
+  text-align: center;
+  white-space: pre;
+}
+
+.footer-5 {
+  left: 2px;
+  top: 830px;
+  width: 402px;
+  height: 44px;
+  overflow: hidden;
+}
+
+.retro-line-8 {
+  color: #5e91b8;
+  left: -16px;
+  top: 802px;
+  width: 420px;
+  height: 28px;
+  overflow: hidden;
+}
+
+
+/* ============ Halaman: checkout (hasil konversi desain Figma) ============ */
+
+.checkout {
+  left: 0;
+  top: 0;
+  width: 1280px;
+  height: 3990px;
+  background-color: #eaf5ff;
+  overflow: hidden;
+}
+
+.background {
+  left: 0;
+  top: 0;
+  width: 1280px;
+  height: 3990px;
+  background-color: #eaf5ff;
+}
+
+.title-page-checkout {
+  left: 44px;
+  top: 52px;
+  width: 241px;
+  height: 45px;
+  overflow: hidden;
+}
+
+.back-3 {
+  left: 0;
+  top: 0;
+  width: 41px;
+  height: 41px;
+}
+
+.checkout-label {
+  left: 56px;
+  top: 3px;
+  width: 185px;
+  height: 42px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 29px;
+  font-weight: 500;
+  color: #285f8d;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.formulir-label {
+  left: 64px;
+  top: 158px;
+  width: 1100px;
+  height: 64px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 44px;
+  font-weight: 400;
+  font-style: italic;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.deskripsi-form {
+  left: 64px;
+  top: 236px;
+  width: 1140px;
+  height: 28px;
+  font-family: 'Inter', sans-serif;
+  font-size: 19px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.container-data-pemesan {
+  left: 64px;
+  top: 837px;
+  width: 1152px;
+  height: 1262px;
+  border-radius: 24px 24px 24px 24px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #a9cde8, 0 8px 24px -4px rgba(78, 133, 174, 0.07);
+}
+
+.nama-pemesan {
+  left: 143px;
+  top: 949px;
+  width: 972px;
+  height: 122px;
+  overflow: hidden;
+}
+
+.kolom-nama {
+  left: 0;
+  top: 48px;
+  width: 972px;
+  height: 74px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #f0f8ff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+}
+
+.label-nama {
+  left: 0;
+  top: 0;
+  width: 153px;
+  height: 26px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.form-nama {
+  left: 34px;
+  top: 48px;
+  width: 924px;
+  height: 74px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 74px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  outline: 0;
+  resize: none;
+}
+
+.kontak-pemesan {
+  left: 145px;
+  top: 1108px;
+  width: 972px;
+  height: 122px;
+  overflow: hidden;
+}
+
+.label-kontak {
+  left: 0;
+  top: 0;
+  width: 325px;
+  height: 26px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.alamat-pemesan {
+  left: 138px;
+  top: 1271px;
+  width: 979px;
+  height: 766px;
+  overflow: hidden;
+}
+
+.kolom-jalan {
+  left: 7px;
+  top: 91px;
+  width: 972px;
+  height: 75px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #f0f8ff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+}
+
+.form-jalan {
+  left: 41px;
+  top: 91px;
+  width: 924px;
+  height: 75px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 75px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  outline: 0;
+  resize: none;
+}
+
+.label-alamat {
+  left: 7px;
+  top: 0;
+  width: 182px;
+  height: 26px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.label-nama-jalan {
+  left: 7px;
+  top: 46px;
+  width: 111px;
+  height: 26px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.rt {
+  left: 7px;
+  top: 188px;
+  width: 454px;
+  height: 122px;
+  overflow: hidden;
+}
+
+.kolom-rt {
+  left: 0;
+  top: 47px;
+  width: 454px;
+  height: 75px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #f0f8ff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+}
+
+.form-rt {
+  left: 34px;
+  top: 47px;
+  width: 406px;
+  height: 75px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 75px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  outline: 0;
+  resize: none;
+}
+
+.label-rt {
+  left: 7px;
+  top: 0;
+  width: 26px;
+  height: 26px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.rw {
+  left: 502px;
+  top: 188px;
+  width: 459px;
+  height: 122px;
+  overflow: hidden;
+}
+
+.kolom-rw {
+  left: 0;
+  top: 47px;
+  width: 459px;
+  height: 75px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #f0f8ff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+}
+
+.form-rw {
+  left: 26px;
+  top: 47px;
+  width: 419px;
+  height: 75px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 75px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  outline: 0;
+  resize: none;
+}
+
+.label-rw {
+  left: 6px;
+  top: 0;
+  width: 32px;
+  height: 26px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.kelurahan {
+  left: 5px;
+  top: 332px;
+  width: 454px;
+  height: 122px;
+  overflow: hidden;
+}
+
+.form-kelurahan {
+  left: 19px;
+  top: 47px;
+  width: 421px;
+  height: 75px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 75px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  outline: 0;
+  resize: none;
+}
+
+.label-rt-2 {
+  left: 7px;
+  top: 0;
+  width: 94px;
+  height: 26px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.kecamatan {
+  left: 507px;
+  top: 332px;
+  width: 454px;
+  height: 122px;
+  overflow: hidden;
+}
+
+.label-kecamatan {
+  left: 7px;
+  top: 0;
+  width: 106px;
+  height: 26px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.kota {
+  left: 5px;
+  top: 488px;
+  width: 456px;
+  height: 122px;
+  overflow: hidden;
+}
+
+.kolom-kota {
+  left: 0;
+  top: 47px;
+  width: 456px;
+  height: 75px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #f0f8ff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+}
+
+.form-kota {
+  left: 39.26px;
+  top: 47px;
+  width: 402.74px;
+  height: 75px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 75px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  outline: 0;
+  resize: none;
+}
+
+.label-kota {
+  left: 14.46px;
+  top: 0;
+  width: 223.14px;
+  height: 26px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.provinsi {
+  left: 507px;
+  top: 488px;
+  width: 456px;
+  height: 122px;
+  overflow: hidden;
+}
+
+.form-provinsi {
+  left: 39px;
+  top: 47px;
+  width: 403px;
+  height: 75px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 75px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  outline: 0;
+  resize: none;
+}
+
+.kode-pos {
+  left: 0;
+  top: 644px;
+  width: 456px;
+  height: 122px;
+  overflow: hidden;
+}
+
+.label-data-pemesan {
+  left: 96px;
+  top: 869px;
+  width: 1000px;
+  height: 46px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 32px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.card-reminder {
+  left: 64px;
+  top: 682px;
+  width: 1152px;
+  height: 114px;
+  overflow: hidden;
+}
+
+.container-item-pesanan {
+  left: 0;
+  top: 0;
+  width: 1152px;
+  height: 114px;
+  border-radius: 24px 24px 24px 24px;
+  background-color: #fce4fc;
+  box-shadow: inset 0 0 0 1px #a9cde8, 0 8px 24px -4px rgba(78, 133, 174, 0.07);
+}
+
+.item-label {
+  left: 32px;
+  top: 19px;
+  width: 135px;
+  height: 41px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 28px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.reminder {
+  left: 33px;
+  top: 63px;
+  width: 948px;
+  height: 25px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #285f8d;
+  line-height: 1.4;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.form-item {
+  left: 64px;
+  top: 314px;
+  width: 1152px;
+  height: 340px;
+  overflow: hidden;
+}
+
+.container-item-pesanan-2 {
+  left: 0;
+  top: 0;
+  width: 1152px;
+  height: 340px;
+  border-radius: 24px 24px 24px 24px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #a9cde8, 0 8px 24px -4px rgba(78, 133, 174, 0.07);
+}
+
+.checkout-items {
+  left: 32px;
+  top: 92px;
+  width: 1088px;
+  height: 212px;
+}
+
+.checkout-item {
+  left: 0;
+  top: 0;
+  width: 1088px;
+  height: 212px;
+}
+
+.item-container-specific {
+  left: 0;
+  top: 0;
+  width: 1088px;
+  height: 212px;
+  border-radius: 18px 18px 18px 18px;
+  background-color: #dfefff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+}
+
+.price-pcs {
+  left: 188px;
+  top: 78px;
+  width: 450px;
+  height: 28px;
+  font-family: 'Inter', sans-serif;
+  font-size: 19px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.item-name {
+  left: 188px;
+  top: 32px;
+  width: 540px;
+  height: 41px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 28px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.price-subtotal {
+  left: 799px;
+  top: 32px;
+  width: 230px;
+  height: 38px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 26px;
+  font-weight: 400;
+  font-style: italic;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: right;
+  white-space: pre-wrap;
+}
+
+.container-item-image {
+  left: 24px;
+  top: 34px;
+  width: 132px;
+  height: 132px;
+  border-radius: 16px 16px 16px 16px;
+  background-image: url(images/produk-blooming-aurora-bouquet.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.amount-button-2 {
+  left: 853px;
+  top: 127px;
+  width: 121px;
+  height: 48px;
+  overflow: hidden;
+}
+
+.plus-button-2 {
+  left: 989px;
+  top: 127px;
+  width: 45px;
+  height: 48px;
+  overflow: hidden;
+}
+
+.minus-button-2 {
+  left: 786px;
+  top: 127px;
+  width: 51px;
+  height: 48px;
+  overflow: hidden;
+}
+
+.delete-button-2 {
+  left: 716px;
+  top: 127px;
+  width: 54px;
+  height: 48px;
+  overflow: hidden;
+}
+
+.item-label-2 {
+  left: 32px;
+  top: 28px;
+  width: 1000px;
+  height: 46px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 32px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.generate-receipt {
+  left: 64px;
+  top: 2593px;
+  width: 1152px;
+  height: 84px;
+  overflow: hidden;
+}
+
+.button-container-print {
+  left: 0;
+  top: 0;
+  width: 1152px;
+  height: 84px;
+  border-radius: 14px 14px 14px 14px;
+  background-color: #91c7f0;
+  box-shadow: inset 0 0 0 2px #204b70;
+}
+
+.cetak-struk-belanja {
+  left: 450.5px;
+  top: 26px;
+  width: 209px;
+  height: 32px;
+  font-family: 'Inter', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre;
+}
+
+.fa-solid-print {
+  left: 449.5px;
+  top: 28px;
+  width: 28px;
+  height: 28px;
+}
+
+.form-notes-pelanggan {
+  left: 64px;
+  top: 2147px;
+  width: 1152px;
+  height: 398px;
+  overflow: hidden;
+}
+
+.container-notes {
+  left: 0;
+  top: 0;
+  width: 1152px;
+  height: 398px;
+  border-radius: 24px 24px 24px 24px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #a9cde8, 0 8px 24px -4px rgba(78, 133, 174, 0.07);
+}
+
+.label-catatan-pemesan {
+  left: 42px;
+  top: 38px;
+  width: 1000px;
+  height: 38px;
+  font-family: 'Inter', sans-serif;
+  font-size: 26px;
+  font-weight: 600;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.kolom-komentar-catatan {
+  left: 42px;
+  top: 104px;
+  width: 1067px;
+  height: 244px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #f0f8ff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+}
+
+.form-catatan {
+  left: 85px;
+  top: 140px;
+  width: 1010px;
+  height: 194px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.5;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  outline: 0;
+  resize: none;
+}
+
+.footer-6 {
+  left: 0;
+  top: 3770px;
+  width: 1323px;
+  height: 220px;
+  overflow: hidden;
+}
+
+.footer-line-2 {
+  left: 0;
+  top: 8px;
+  width: 1280px;
+  height: 0;
+  border-top: 1px solid #466c8c;
+}
+
+.card-detail-belanja {
+  left: 64px;
+  top: 2762px;
+  width: 1152px;
+  height: 844px;
+  border-radius: 28px 28px 28px 28px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #a9cde8, 0 12px 32px 0 rgba(78, 133, 174, 0.1);
+  overflow: hidden;
+}
+
+.container-detail-belanja {
+  left: 0;
+  top: 0;
+  width: 1056px;
+  height: 767px;
+  border-radius: 28px 28px 28px 28px;
+  background-color: #f7fbff;
+}
+
+.container-text {
+  left: 40px;
+  top: 138px;
+  width: 1041px;
+  height: 534px;
+  border-radius: 18px 18px 18px 18px;
+  background-color: #f0f8ff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+}
+
+.detail-belanja {
+  left: 48px;
+  top: 44px;
+  width: 900px;
+  height: 49px;
+  font-family: 'Inter', sans-serif;
+  font-size: 34px;
+  font-weight: 600;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.receipt-text {
+  left: 89px;
+  top: 169px;
+  width: 927px;
+  height: 434px;
+  overflow: hidden;
+}
+
+.download-button {
+  left: 40px;
+  top: 715px;
+  width: 500px;
+  height: 80px;
+  overflow: hidden;
+}
+
+.download-receipt-container {
+  left: 0;
+  top: 0;
+  width: 500px;
+  height: 80px;
+  border-radius: 14px 14px 14px 14px;
+  background-color: #91c7f0;
+  box-shadow: inset 0 0 0 2px #204b70;
+}
+
+.download-detail-belanja {
+  left: 117.75px;
+  top: 27px;
+  width: 257px;
+  height: 32px;
+  font-family: 'Inter', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #285f8d;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre;
+}
+
+.griddy-icons-file-download-filled {
+  left: 103px;
+  top: 29.95px;
+  width: 24.1px;
+  height: 24.1px;
+}
+
+.send-receipt-to-dm {
+  left: 578px;
+  top: 715px;
+  width: 504px;
+  height: 80px;
+  overflow: hidden;
+}
+
+.send-to-instagram {
+  left: 0;
+  top: 0;
+  width: 504px;
+  height: 80px;
+  border-radius: 14px 14px 14px 14px;
+  background-color: #e07ae2;
+  box-shadow: inset 0 0 0 2px #204b70;
+}
+
+.kirim-ke-admin {
+  left: 176.02px;
+  top: 24px;
+  width: 186.37px;
+  height: 32px;
+  font-family: 'Inter', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.checkout-2 {
+  left: 0;
+  top: 0;
+  width: 402px;
+  height: 2442px;
+  background-color: #eaf5ff;
+  overflow: hidden;
+}
+
+.full-length-checkout-content {
+  left: 0;
+  top: 132px;
+  width: 402px;
+  height: 2310px;
+}
+
+.scroll-content-3 {
+  left: 0;
+  top: 0;
+  width: 402px;
+  height: 2310px;
+  overflow: hidden;
+}
+
+.formulir-pemesanan {
+  left: 20px;
+  top: 20px;
+  width: 362px;
+  height: 36px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 25px;
+  font-weight: 400;
+  font-style: italic;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.lengkapi-formulir-berikut-untuk-membuat-pesanan {
+  left: 20px;
+  top: 74px;
+  width: 362px;
+  height: 38px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.n-01-item-pesanan {
+  left: 20px;
+  top: 130px;
+  width: 362px;
+  height: 227px;
+  border-radius: 18px 18px 18px 18px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+  overflow: hidden;
+}
+
+.n-01-item-pesanan-2 {
+  left: 17px;
+  top: 17px;
+  width: 328px;
+  height: 29px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.checkout-items-2 {
+  left: 17px;
+  top: 62px;
+  width: 328px;
+  height: 148px;
+}
+
+.checkout-item-2 {
+  left: 0;
+  top: 0;
+  width: 328px;
+  height: 148px;
+}
+
+.ringkasan-item {
+  left: 0;
+  top: 0;
+  width: 328px;
+  height: 88px;
+  overflow: hidden;
+}
+
+.foto-pesanan {
+  left: 0;
+  top: 0;
+  width: 72px;
+  height: 88px;
+  border-radius: 10px 10px 10px 10px;
+  background-image: url(images/produk-blooming-aurora-bouquet.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.nama-dan-harga {
+  left: 84px;
+  top: 0;
+  width: 244px;
+  height: 77px;
+  overflow: hidden;
+}
+
+.blooming-aurora-bouquet-2 {
+  left: 0;
+  top: 0;
+  width: 244px;
+  height: 25px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.rp-90-000-item {
+  left: 0;
+  top: 31px;
+  width: 244px;
+  height: 17px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.rp-180-000-3 {
+  left: 0;
+  top: 54px;
+  width: 244px;
+  height: 23px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.hapus-dan-jumlah-produk {
+  left: 0;
+  top: 104px;
+  width: 328px;
+  height: 44px;
+  overflow: hidden;
+}
+
+.hapus-produk-2 {
+  left: 0;
+  top: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #dfefff;
+  box-shadow: inset 0 0 0 1px #000000;
+  overflow: hidden;
+}
+
+.ep-delete-filled-3 {
+  left: 13px;
+  top: 13px;
+  width: 18px;
+  height: 18px;
+}
+
+.vector-16 {
+  left: 1.12px;
+  top: 1.12px;
+  width: 15.75px;
+  height: 15.75px;
+  overflow: visible;
+  fill: #285f8d;
+}
+
+.kontrol-jumlah-produk {
+  left: 180px;
+  top: 0;
+  width: 148px;
+  height: 44px;
+  overflow: hidden;
+}
+
+.n-2-3 {
+  left: 52px;
+  top: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #91c7f0;
+  box-shadow: inset 0 0 0 1px #000000;
+  overflow: hidden;
+}
+
+.n-2-4 {
+  left: 17.5px;
+  top: 12px;
+  width: 9px;
+  height: 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre;
+}
+
+.layer-8 {
+  left: 104px;
+  top: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #dfefff;
+  box-shadow: inset 0 0 0 1px #000000;
+  overflow: hidden;
+}
+
+.reminder-warna-bunga {
+  left: 20px;
+  top: 369px;
+  width: 362px;
+  height: 106px;
+  border-radius: 18px 18px 18px 18px;
+  background-color: #fbd4fa;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+  overflow: hidden;
+}
+
+.reminder-2 {
+  left: 17px;
+  top: 17px;
+  width: 328px;
+  height: 22px;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.harap-konsultasi-terkait-variasi-warna-bunga-kep {
+  left: 17px;
+  top: 55px;
+  width: 328px;
+  height: 34px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #285f8d;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.n-02-data-pemesan {
+  left: 20px;
+  top: 493px;
+  width: 362px;
+  height: 722px;
+  border-radius: 18px 18px 18px 18px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+  overflow: hidden;
+}
+
+.isian-nama-lengkap {
+  left: 17px;
+  top: 62px;
+  width: 328px;
+  height: 73px;
+  overflow: hidden;
+}
+
+.nama-lengkap {
+  left: 0;
+  top: 0;
+  width: 328px;
+  height: 17px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.input-nama-lengkap {
+  left: 0;
+  top: 25px;
+  width: 328px;
+  height: 48px;
+  border-radius: 10px 10px 10px 10px;
+  background-color: #f0f8ff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+  overflow: hidden;
+}
+
+.form-nama-2 {
+  left: 13px;
+  top: 0;
+  width: 301px;
+  height: 48px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 48px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  outline: 0;
+  resize: none;
+}
+
+.isian-kontak-pemesan-whatsapp-aktif {
+  left: 17px;
+  top: 151px;
+  width: 328px;
+  height: 73px;
+  overflow: hidden;
+}
+
+.alamat-pengiriman {
+  left: 17px;
+  top: 240px;
+  width: 328px;
+  height: 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.isian-nama-jalan {
+  left: 17px;
+  top: 276px;
+  width: 328px;
+  height: 73px;
+  overflow: hidden;
+}
+
+.nama-jalan {
+  left: 0;
+  top: 0;
+  width: 328px;
+  height: 17px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.dua-kolom-alamat {
+  left: 17px;
+  top: 365px;
+  width: 328px;
+  height: 73px;
+  overflow: hidden;
+}
+
+.isian-rt {
+  left: 0;
+  top: 0;
+  width: 158px;
+  height: 73px;
+  overflow: hidden;
+}
+
+.rt-2 {
+  left: 0;
+  top: 0;
+  width: 158px;
+  height: 17px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #466c8c;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.input-rt {
+  left: 0;
+  top: 25px;
+  width: 158px;
+  height: 48px;
+  border-radius: 10px 10px 10px 10px;
+  background-color: #f0f8ff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+  overflow: hidden;
+}
+
+.form-rt-2 {
+  left: 13px;
+  top: 0;
+  width: 131px;
+  height: 48px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 48px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  outline: 0;
+  resize: none;
+}
+
+.isian-rw {
+  left: 170px;
+  top: 0;
+  width: 158px;
+  height: 73px;
+  overflow: hidden;
+}
+
+.dua-kolom-alamat-2 {
+  left: 17px;
+  top: 454px;
+  width: 328px;
+  height: 73px;
+  overflow: hidden;
+}
+
+.dua-kolom-alamat-3 {
+  left: 17px;
+  top: 543px;
+  width: 328px;
+  height: 73px;
+  overflow: hidden;
+}
+
+.isian-kode-pos {
+  left: 17px;
+  top: 632px;
+  width: 328px;
+  height: 73px;
+  overflow: hidden;
+}
+
+.n-03-catatan-pemesan {
+  left: 20px;
+  top: 1229px;
+  width: 362px;
+  height: 181px;
+  border-radius: 18px 18px 18px 18px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+  overflow: hidden;
+}
+
+.n-03-catatan-pemesan-opsional {
+  left: 17px;
+  top: 17px;
+  width: 328px;
+  height: 23px;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.isi-catatan-opsional {
+  left: 17px;
+  top: 56px;
+  width: 328px;
+  height: 108px;
+  border-radius: 10px 10px 10px 10px;
+  background-color: #f0f8ff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+  overflow: hidden;
+}
+
+.form-catatan-2 {
+  left: 13px;
+  top: 13px;
+  width: 301px;
+  height: 81px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.5;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  outline: 0;
+  resize: none;
+}
+
+.cetak-struk-inline {
+  left: 20px;
+  top: 1428px;
+  width: 362px;
+  height: 50px;
+  box-shadow: inset 0 0 0 1px #204b70;
+  overflow: hidden;
+}
+
+.cetak-struk-belanja-2 {
+  left: 1px;
+  top: 1px;
+  width: 360px;
+  height: 48px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #91c7f0;
+  overflow: hidden;
+}
+
+.cetak-struk-belanja-3 {
+  left: 113.5px;
+  top: 14px;
+  width: 133px;
+  height: 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre;
+}
+
+.detail-belanja-inline {
+  left: 20px;
+  top: 1494px;
+  width: 362px;
+  height: 734px;
+}
+
+.detail-belanja-2 {
+  left: 0;
+  top: 0;
+  width: 362px;
+  height: 32px;
+  font-family: 'DM Serif Display', sans-serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.rincian-lengkap-struk {
+  left: 0;
+  top: 46px;
+  width: 362px;
+  height: 570px;
+  border-radius: 18px 18px 18px 18px;
+  background-color: #f7fbff;
+  box-shadow: inset 0 0 0 1px #a9cde8;
+  overflow: hidden;
+}
+
+.unduh-dan-kirim-detail-belanja {
+  left: 0;
+  top: 630px;
+  width: 362px;
+  height: 104px;
+  overflow: hidden;
+}
+
+.download-detail-belanja-2 {
+  left: 0;
+  top: 0;
+  width: 362px;
+  height: 48px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #91c7f0;
+  box-shadow: inset 0 0 0 1px #204b70;
+  overflow: hidden;
+}
+
+.download-detail-belanja-3 {
+  left: 100px;
+  top: 14px;
+  width: 162px;
+  height: 20px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #204b70;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre;
+}
+
+.kirim-ke-admin-2 {
+  left: 0;
+  top: 56px;
+  width: 362px;
+  height: 48px;
+  border-radius: 12px 12px 12px 12px;
+  background-color: #dd7edc;
+  box-shadow: inset 0 0 0 1px #204b70;
+  overflow: hidden;
+}
+
+.kirim-ke-admin-3 {
+  left: 130.5px;
+  top: 14px;
+  width: 101px;
+  height: 20px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #f7fbff;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre;
+}
+
+.checkout-footer {
+  left: 20px;
+  top: 2261px;
+  width: 362px;
+  height: 40px;
+  overflow: hidden;
+}
+
+.copyright-3 {
+  left: 0;
+  top: 12px;
+  width: 362px;
+  height: 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  color: #204b70;
+  line-height: 16px;
+  text-align: center;
+  white-space: pre-wrap;
+}
